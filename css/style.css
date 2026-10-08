@@ -1114,7 +1114,7 @@ button, input, select, textarea {
 }
 
 .venue-content h2 {
-  color: white;
+  color: rgb(0, 0, 0);
   margin-bottom: 22px;
 }
 
@@ -1729,3 +1729,4 @@ button, input, select, textarea {
   white-space: nowrap;
   border-width: 0;
 }
+
