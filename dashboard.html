@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard · Waste Resource Symposium 2026</title>
+<meta name="description" content="Waste Resource Symposium 2026 — Government of Goa">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" type="image/x-icon" href="favicon/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+<link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
+<link rel="manifest" href="favicon/site.webmanifest">
+<meta name="theme-color" content="#126B3F">
+<style>
+/* Dashboard-specific styles */
+.dashboard-container { display: none; }
+.dashboard-container.active { display: block; }
+.login-container { max-width: 400px; margin: 80px auto; padding: 40px; }
+.login-container .card { text-align: center; }
+.login-container input { width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+.stat-card { padding: 24px; text-align: center; }
+.stat-number { font-size: 48px; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+.stat-label { color: var(--muted); }
+.stat-card.pending .stat-number { color: var(--orange); }
+.stat-card.submitted .stat-number { color: var(--green); }
+.stat-card.shortlisted .stat-number { color: var(--gold); }
+.table-wrap { overflow-x: auto; }
+.dashboard-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+.dashboard-table th { text-align: left; padding: 12px 16px; border-bottom: 2px solid var(--line); font-weight: 600; }
+.dashboard-table td { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.dashboard-table tr:hover { background: var(--soft-bg); }
+.status-tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.status-tag.pending { background: #fef3e6; color: var(--orange); }
+.status-tag.submitted { background: #e6f7ef; color: var(--green); }
+.status-tag.shortlisted { background: #fef9e6; color: #b38600; }
+.status-tag.finalist { background: #e6f0fe; color: #2563eb; }
+.scoring-panel { display: none; }
+.scoring-panel.active { display: block; }
+.criteria-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.criteria-card { padding: 20px; }
+.criteria-card label { display: block; font-weight: 600; margin-bottom: 8px; }
+.criteria-card input[type="range"] { width: 100%; }
+.criteria-card .score-value { font-size: 24px; font-weight: 900; color: var(--green); }
+.loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.loading-overlay.hidden { display: none; }
+.tab-buttons { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+.tab-btn { padding: 10px 20px; border: none; background: none; font-weight: 600; cursor: pointer; border-radius: 6px; }
+.tab-btn:hover { background: var(--soft-bg); }
+.tab-btn.active { background: var(--navy); color: white; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="top-strip"><div class="wrap"><span>Government of Goa · Department of Science & Technology and Waste Management</span><span>2–3 November 2026 · Goa</span></div></div>
+<header class="site-header">
+  <div class="wrap nav">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">WR</span>
+      <span class="brand-copy"><strong>Waste Resource Symposium 2026</strong><span>Goa Leads the Way · Keep It Simple</span></span>
+    </a>
+    <button class="menu" aria-label="Open menu" aria-expanded="false">☰</button>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">Symposium</a>
+      <a href="guidelines.html">Challenge</a>
+      <a href="learn.html">Learn</a>
+      <a href="teams.html">Teams</a>
+      <a href="showcase.html">Showcase</a>
+      <a href="venue.html">Event</a>
+      <a class="cta" href="register.html">Register / Submit</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<!-- Login View -->
+<div id="login-view" class="login-container">
+  <div class="card">
+    <div class="kicker">Admin Access</div>
+    <h2 style="font-size:28px;margin-bottom:8px">Sign in to dashboard</h2>
+    <p style="color:var(--muted);margin-bottom:24px">Enter your authorized email address</p>
+    <form id="login-form">
+      <input type="email" id="login-email" placeholder="your.email@goa.gov.in" required>
+      <button type="submit" class="btn dark" style="width:100%">Sign In</button>
+    </form>
+    <p id="login-error" style="color:var(--orange);margin-top:16px;display:none"></p>
+    <p style="color:var(--muted);font-size:14px;margin-top:24px">
+      Access is restricted to authorized admin and judge accounts.<br>
+      Contact the department to request access.
+    </p>
+  </div>
+</div>
+
+<!-- Dashboard View -->
+<div id="dashboard-view" class="dashboard-container">
+  <section class="page-hero"><div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+      <div><div class="breadcrumb">Admin / Dashboard</div><h1>Submission management</h1></div>
+      <div style="text-align:right">
+        <p style="font-size:14px;color:var(--muted)">Signed in as</p>
+        <p style="font-weight:600" id="user-email">—</p>
+        <button id="logout-btn" class="btn outline" style="margin-top:8px;padding:6px 12px;font-size:14px">Sign Out</button>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <!-- Stats -->
+    <div class="stats-grid" style="margin-bottom:32px">
+      <div class="card stat-card">
+        <div class="stat-number" id="stat-total">0</div>
+        <div class="stat-label">Total Teams</div>
+      </div>
+      <div class="card stat-card pending">
+        <div class="stat-number" id="stat-pending">0</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+      <div class="card stat-card submitted">
+        <div class="stat-number" id="stat-submitted">0</div>
+        <div class="stat-label">Submitted</div>
+      </div>
+      <div class="card stat-card shortlisted">
+        <div class="stat-number" id="stat-shortlisted">0</div>
+        <div class="stat-label">Shortlisted</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-buttons">
+      <button class="tab-btn active" data-tab="submissions">Submissions</button>
+      <button class="tab-btn" data-tab="scoring">Scoring</button>
+      <button class="tab-btn" data-tab="symposium">Symposium Data</button>
+    </div>
+
+    <!-- Submissions Tab -->
+    <div id="tab-submissions" class="tab-content active">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div class="kicker">Team submissions</div>
+          <input class="search" id="team-search" style="max-width:280px" placeholder="Search teams...">
+        </div>
+        <div class="table-wrap">
+          <table class="dashboard-table">
+            <thead><tr>
+              <th>Team Name</th>
+              <th>Institution</th>
+              <th>Category</th>
+              <th>State</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody id="teams-tbody">
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Loading submissions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scoring Tab -->
+    <div id="tab-scoring" class="tab-content">
+      <div class="split">
+        <div class="card">
+          <div class="kicker">Leaderboard</div>
+          <h3 style="margin-bottom:16px">Team Rankings</h3>
+          <div id="leaderboard-list" style="max-height:500px;overflow-y:auto">
+            <p style="color:var(--muted)">Select a team to score</p>
+          </div>
+        </div>
+        <div class="card scoring-panel" id="scoring-panel">
+          <div class="kicker">Scoring</div>
+          <h3 id="scoring-team-name" style="margin-bottom:8px">Select a team</h3>
+          <p id="scoring-team-project" style="color:var(--muted);margin-bottom:24px">—</p>
+
+          <form id="scoring-form">
+            <div class="criteria-grid" id="criteria-inputs">
+              <!-- Generated dynamically -->
+            </div>
+            <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end">
+              <button type="button" class="btn outline" id="cancel-score">Cancel</button>
+              <button type="submit" class="btn dark">Submit Scores</button>
+            </div>
+          </form>
+        </div>
+        <div class="card" id="no-scoring-team">
+          <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+            <div style="font-size:48px;margin-bottom:16px">📊</div>
+            <h3>Select a team to score</h3>
+            <p>Click on a team in the leaderboard to open scoring</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Symposium Data Tab -->
+    <div id="tab-symposium" class="tab-content">
+      <div class="card">
+        <div class="kicker">Symposium Participants</div>
+        <h3 style="margin-bottom:16px">Registered participants</h3>
+        <div id="symposium-list">
+          <p style="color:var(--muted)">Loading symposium data...</p>
+        </div>
+      </div>
+    </div>
+  </div></section>
+</div>
+</main>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay hidden">
+  <div style="text-align:center">
+    <div class="loading-spinner" style="width:40px;height:40px;border:3px solid var(--soft-border);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px"></div>
+    <p>Loading...</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div>
+      <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:10px">Waste Resource Symposium 2026</div>
+      <p class="footer-small">Government of Goa · Department of Science & Technology and Waste Management.</p>
+    </div>
+    <div>
+      <div class="kicker" style="color:#9bd0c1">Explore</div>
+      <p><a href="index.html">Home</a><br><a href="about.html">Symposium</a><br><a href="guidelines.html">Challenge</a></p>
+    </div>
+    <div>
+      <div class="kicker" style="color:#9bd0c1">Contact</div>
+      <p class="footer-small">0832-2416581 / 2416584<br>dir-dstwm@goa.gov.in</p>
+    </div>
+  </div>
+  <div class="wrap footer-bottom"><span>© 2026 Government of Goa</span></div>
+</footer>
+
+<div class="toast" aria-live="polite"></div>
+<script src="js/script.js"></script>
+<script>
+// Dashboard JavaScript
+(function(){
+  const API_BASE = '';
+  let currentUser = null;
+  let allTeams = [];
+  let selectedTeamId = null;
+
+  // Elements
+  const loginView = document.getElementById('login-view');
+  const dashboardView = document.getElementById('dashboard-view');
+  const loginForm = document.getElementById('login-form');
+  const loginError = document.getElementById('login-error');
+  const userEmail = document.getElementById('user-email');
+  const logoutBtn = document.getElementById('logout-btn');
+  const loadingOverlay = document.getElementById('loading-overlay');
+
+  // Check auth status on load
+  checkAuth();
+
+  async function checkAuth(){
+    showLoading(true);
+    try{
+      const res = await fetch(API_BASE + '/api/auth/me', {credentials:'include'});
+      if(res.ok){
+        const data = await res.json();
+        if(data.authenticated){
+          currentUser = data.user;
+          showDashboard();
+          return;
+        }
+      }
+    }catch(e){ console.log('Auth check failed'); }
+    showLogin();
+    showLoading(false);
+  }
+
+  function showLoading(show){
+    loadingOverlay.classList.toggle('hidden', !show);
+  }
+
+  function showLogin(){
+    loginView.classList.add('active');
+    dashboardView.classList.remove('active');
+  }
+
+  function showDashboard(){
+    loginView.classList.remove('active');
+    dashboardView.classList.add('active');
+    userEmail.textContent = currentUser.email + ' (' + currentUser.role + ')';
+    loadDashboardData();
+  }
+
+  async function loadDashboardData(){
+    showLoading(true);
+    try{
+      // Load teams
+      const teamsRes = await fetch(API_BASE + '/api/teams/admin/all', {credentials:'include'});
+      if(teamsRes.ok){
+        const teamsData = await teamsRes.json();
+        allTeams = teamsData.teams || [];
+        renderTeamsTable(allTeams);
+        updateStats(allTeams);
+      }
+
+      // Load leaderboard
+      loadLeaderboard();
+    }catch(e){
+      console.error('Failed to load data:', e);
+    }
+    showLoading(false);
+  }
+
+  function renderTeamsTable(teams){
+    const tbody = document.getElementById('teams-tbody');
+    if(!teams.length){
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No teams registered yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = teams.map((t,i) => `
+      <tr>
+        <td><strong>${t.teamName || 'Unnamed'}</strong></td>
+        <td>${t.institution || '—'}</td>
+        <td>${t.category || '—'}</td>
+        <td>${t.state || '—'}</td>
+        <td>—</td>
+        <td><span class="status-tag ${(t.status||'pending').toLowerCase().replace(' ','-')}">${t.status || 'Pending'}</span></td>
+        <td><button class="btn outline" style="padding:4px 10px;font-size:12px" onclick="window.dashboardApp.viewTeam(${i})">View</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function updateStats(teams){
+    document.getElementById('stat-total').textContent = teams.length;
+    document.getElementById('stat-pending').textContent = teams.filter(t => t.status === 'Pending Review').length;
+    document.getElementById('stat-submitted').textContent = teams.length; // All are submitted
+    document.getElementById('stat-shortlisted').textContent = teams.filter(t => t.status === 'Shortlisted' || t.status === 'Finalist').length;
+  }
+
+  async function loadLeaderboard(){
+    try{
+      const res = await fetch(API_BASE + '/api/scoring/leaderboard', {credentials:'include'});
+      if(res.ok){
+        const data = await res.json();
+        renderLeaderboard(data.leaderboard || []);
+      }
+    }catch(e){ console.log('Leaderboard unavailable'); }
+  }
+
+  function renderLeaderboard(leaderboard){
+    const list = document.getElementById('leaderboard-list');
+    if(!leaderboard.length){
+      list.innerHTML = '<p style="color:var(--muted)">No scores submitted yet</p>';
+      return;
+    }
+    list.innerHTML = leaderboard.map(t => `
+      <div style="padding:12px;border-bottom:1px solid var(--line);cursor:pointer" onclick="window.dashboardApp.selectTeamForScoring('${t.teamId}')">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>#${t.rank} ${t.teamId}</strong>
+          <span style="font-weight:900;color:var(--green)">${t.averageScore}</span>
+        </div>
+        <small style="color:var(--muted)">${t.judgeCount} judges</small>
+      </div>
+    `).join('');
+  }
+
+  // Login form
+  loginForm.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    loginError.style.display = 'none';
+
+    try{
+      const res = await fetch(API_BASE + '/api/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        credentials:'include',
+        body: JSON.stringify({email})
+      });
+
+      if(res.ok){
+        const data = await res.json();
+        currentUser = data.user;
+        showDashboard();
+      }else{
+        const data = await res.json();
+        loginError.textContent = data.message || 'Login failed';
+        loginError.style.display = 'block';
+      }
+    }catch(e){
+      loginError.textContent = 'Unable to connect to server';
+      loginError.style.display = 'block';
+    }
+  });
+
+  // Logout
+  logoutBtn.addEventListener('click',async ()=>{
+    await fetch(API_BASE + '/api/auth/logout', {method:'POST',credentials:'include'});
+    currentUser = null;
+    showLogin();
+  });
+
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Search
+  document.getElementById('team-search').addEventListener('input',e=>{
+    const q = e.target.value.toLowerCase();
+    const filtered = allTeams.filter(t =>
+      (t.teamName||'').toLowerCase().includes(q) ||
+      (t.institution||'').toLowerCase().includes(q)
+    );
+    renderTeamsTable(filtered);
+  });
+
+  // Expose functions for onclick handlers
+  window.dashboardApp = {
+    viewTeam: (i) => console.log('View team:', allTeams[i]),
+    selectTeamForScoring: (teamId) => {
+      selectedTeamId = teamId;
+      document.getElementById('no-scoring-team').style.display = 'none';
+      document.getElementById('scoring-panel').classList.add('active');
+      document.getElementById('scoring-team-name').textContent = 'Team: ' + teamId;
+    }
+  };
+})();
+</script>
+</body>
+</html>

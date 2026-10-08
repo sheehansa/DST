@@ -1,0 +1,35 @@
+{
+  "name": "waste-resource-symposium-2026",
+  "version": "1.0.0",
+  "description": "Waste Resource Symposium 2026 - Government of Goa",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "NODE_ENV=development node server/index.js",
+    "build": "echo 'Static site - no build required'",
+    "update-graph": "graphify update ."
+  },
+  "keywords": [
+    "waste-management",
+    "government",
+    "goa",
+    "symposium",
+    "student-challenge"
+  ],
+  "author": "Department of Science & Technology and Waste Management, Goa",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "dotenv": "^16.3.1",
+    "googleapis": "^128.0.0",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "express-rate-limit": "^7.1.5",
+    "morgan": "^1.10.0",
+    "uuid": "^9.0.1"
+  }
+}

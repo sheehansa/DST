@@ -1,0 +1,18 @@
+# Waste Resource Symposium 2026 - Robots.txt
+# Government of Goa - Department of Science & Technology and Waste Management
+
+User-agent: *
+Allow: /
+Disallow: /api/      # API endpoints
+Disallow: /dashboard/  # Admin dashboard
+Disallow: /admin/     # Admin pages
+Disallow: /config/    # Configuration files
+
+# Sitemap location
+Sitemap: https://wrs.goa.gov.in/sitemap.xml
+
+# Crawl delay for search engines (30 seconds)
+Crawl-delay: 30
+
+# Note: In production, update with actual domain:
+# Sitemap: https://www.example.com/sitemap.xml

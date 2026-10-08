@@ -1,0 +1,26 @@
+{
+  "name": "Waste Resource Symposium 2026",
+  "short_name": "WRS 2026",
+  "start_url": "../index.html",
+  "display": "standalone",
+  "background_color": "#FEFEFE",
+  "theme_color": "#126B3F",
+  "description": "Waste Resource Symposium 2026, Goa",
+  "icons": [
+    {
+      "src": "favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
